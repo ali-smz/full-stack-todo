@@ -1,3 +1,5 @@
+import axios from "axios";
+import { useState } from "react";
 import {
   MdEditNote,
   MdDeleteOutline,
@@ -5,9 +7,39 @@ import {
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
 
+const Table = ({ todos, setTodos }) => {
+  const [editText, setEditText] = useState({ body: "" });
 
-const Table = ({todos}) => {
-  
+  const deleteHandler = async (id) => {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/todo/${id}`);
+      setTodos(todos.filter((todo) => todo.id !== id));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const editHandler = async (id, value) => {
+    try {
+      const res = await axios.patch(
+        `http://127.0.0.1:8000/api/todo/${id}/`,
+        value
+      );
+      setTodos(todos.map((todo) => (todo.id === id ? res.data : todo)));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const checkboxHandler = async (id, value) => {
+    editHandler(id, {
+      completed: !value,
+    });
+  };
+
+  const changeHandler = (e) => {
+    setEditText((prev) => ({ ...prev, body: e.target.value }));
+  };
 
   return (
     <div className="flex justify-center mt-5 text-black">
@@ -35,8 +67,13 @@ const Table = ({todos}) => {
           {todos.map((todo) => (
             <tr key={todo.id}>
               <th className="p-3">
-                <span className="inline-block cursor-pointer">
-                  {todo.compeleted ? (
+                <span
+                  className="inline-block cursor-pointer"
+                  onClick={() => {
+                    checkboxHandler(todo.id, todo.completed);
+                  }}
+                >
+                  {todo.completed ? (
                     <MdOutlineCheckBox />
                   ) : (
                     <MdOutlineCheckBoxOutlineBlank />
@@ -45,7 +82,7 @@ const Table = ({todos}) => {
               </th>
               <th className="p-3 text-sm">{todo.body}</th>
               <th className="p-3 text-sm text-center">
-                {todo.compeleted ? (
+                {todo.completed ? (
                   <span className="p-1.5 text-xs tracking-wider font-medium rounded-md bg-green-300">
                     Done
                   </span>
@@ -60,16 +97,56 @@ const Table = ({todos}) => {
               </th>
               <th className="p-3 text-sm font-medium grid grid-flow-col items-center mt-5">
                 <span className="text-xl cursor-pointer">
-                  <MdEditNote />
+                  <label
+                    htmlFor="my_modal_6"
+                    className="btn"
+                    onClick={() => {
+                      setEditText(todo);
+                    }}
+                  >
+                    {" "}
+                    <MdEditNote className="text-xl" />
+                  </label>
                 </span>
                 <span className="text-xl cursor-pointer">
-                  <MdDeleteOutline />
+                  <MdDeleteOutline
+                    onClick={() => {
+                      deleteHandler(todo.id);
+                    }}
+                  />
                 </span>
               </th>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <input type="checkbox" id="my_modal_6" className="modal-toggle" />
+      <div className="modal" role="dialog">
+        <div className="modal-box bg-blue-100">
+          <h3 className="text-lg font-bold mb-4">Edit Todo</h3>
+          <input
+            type="text"
+            value={editText.body}
+            className="input input-bordered input-info w-full max-w-xs bg-white"
+            onChange={changeHandler}
+          />
+          <div className="modal-action">
+            <label
+              htmlFor="my_modal_6"
+              onClick={() => {
+                editHandler(editText.id, editText);
+              }}
+              className="btn btn-primary"
+            >
+              Edit
+            </label>
+            <label htmlFor="my_modal_6" className="btn">
+              Close
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

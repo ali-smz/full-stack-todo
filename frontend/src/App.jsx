@@ -25,7 +25,7 @@ function App() {
         <h1 className="text-5xl text-center text-black pb-14">Todo list</h1>
       </nav>
       <TodoForm setTodos={setTodos} fetchData={fetchData} />
-      <Table todos={todos} />
+      <Table todos={todos} setTodos={setTodos} />
     </div>
   );
 }

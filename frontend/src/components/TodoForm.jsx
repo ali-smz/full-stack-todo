@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 
-const TodoForm = ({ setTodos, fetchData }) => {
+const TodoForm = ({ fetchData }) => {
   const [newTodo, setNewTodo] = useState({
     body: "",
   });
@@ -16,7 +16,7 @@ const TodoForm = ({ setTodos, fetchData }) => {
   const postTodo = async () => {
     try {
       await axios.post("http://127.0.0.1:8000/api/todo/", newTodo);
-      setTodos((prev) => [...prev, newTodo]);
+      setNewTodo({ body: "" });
       fetchData();
     } catch (error) {
       console.log(error);
@@ -31,6 +31,11 @@ const TodoForm = ({ setTodos, fetchData }) => {
         className="input input-bordered input-info w-full max-w-xs bg-white"
         value={newTodo.body}
         onChange={changeHandler}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            postTodo();
+          }
+        }}
       />
       <button className="btn ml-3 btn-primary" onClick={postTodo}>
         Add Todo
