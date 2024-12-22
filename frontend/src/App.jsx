@@ -13,12 +13,13 @@ function App() {
     try {
       const res = await axios.get("http://127.0.0.1:8000/api/todo/");
       if (res.status === 200) {
-        setTodos(res.data);
+        setTodos(res.data.results);
       }
     } catch (error) {
       console.log(error);
     }
   };
+  console.log(todos);
   return (
     <div className="bg-indigo-100 px-8 min-h-screen">
       <nav className="pt-8">
